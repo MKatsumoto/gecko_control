@@ -21,9 +21,9 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
-#include "gecko_control/BaseVelocity.h"
-#include "gecko_control/FlipperVelocity.h"
-#include "gecko_control/MbedTx.h"
+#include "gecko_msgs/BaseVelocity.h"
+#include "gecko_msgs/FlipperVelocity.h"
+#include "gecko_msgs/MbedTx.h"
 
 /* ---------- Data Structure ---------- */
 struct Velocity
@@ -59,8 +59,8 @@ class GeckoControl
 public:
   GeckoControl(); // Initialize publisher and subscriber
   // Callback function
-  void baseVelocityCallback(const gecko_control::BaseVelocity::ConstPtr& msg);         // TODO: check
-  void flipperVelocityCallback(const gecko_control::FlipperVelocity::ConstPtr& msg); // TODO: modify
+  void baseVelocityCallback(const gecko_msgs::BaseVelocity::ConstPtr& msg);         // TODO: check
+  void flipperVelocityCallback(const gecko_msgs::FlipperVelocity::ConstPtr& msg); // TODO: modify
   void baseOrientationCallback(const sensor_msgs::Imu::ConstPtr& msg);                  // TODO: check
 
 private:
@@ -80,8 +80,8 @@ private:
   // Helper Functions
   void adaptVelocity2Slope(const Velocity& velocity, Velocity* modified_velocity);
   WheelVelocity baseVelocity2wheelVelocity(const Velocity base_velocity);
-  void wheelVelocity2mbedTxData(const WheelVelocity& wheel_velocity, gecko_control::MbedTx* tx_data);
-  void flipperVelocity2mbedTxData(const FlipperVelocity& flipper_velocity, gecko_control::MbedTx* tx_data);
+  void wheelVelocity2mbedTxData(const WheelVelocity& wheel_velocity, gecko_msgs::MbedTx* tx_data);
+  void flipperVelocity2mbedTxData(const FlipperVelocity& flipper_velocity, gecko_msgs::MbedTx* tx_data);
   inline void imposeVelocityLimit(int& velocity)
   {
     if(velocity > 100) velocity = 100;

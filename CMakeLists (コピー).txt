@@ -5,7 +5,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   sensor_msgs
-  gecko_msgs
   message_generation
 )
 
@@ -13,12 +12,12 @@ find_package(catkin REQUIRED COMPONENTS
 ## Declare ROS messages, services and actions ##
 ################################################
 ## Generate messages in the 'msg' folder
-#add_message_files(
-#  FILES
-#  MbedTx.msg
-#  BaseVelocity.msg
-#  FlipperVelocity.msg
-#)
+add_message_files(
+  FILES
+  MbedTx.msg
+  BaseVelocity.msg
+  FlipperVelocity.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -35,17 +34,17 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-#generate_messages(
-#  DEPENDENCIES
-#  std_msgs
-#)
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
 ###################################
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS roscpp std_msgs sensor_msgs gecko_msgs message_runtime
+  CATKIN_DEPENDS roscpp std_msgs sensor_msgs message_runtime
 )
 
 ###########
@@ -87,5 +86,5 @@ target_link_libraries(gecko_control_node
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(gecko_control_node
-  gecko_msgs_generate_messages_cpp
+  gecko_control_generate_messages_cpp
 )

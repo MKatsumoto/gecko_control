@@ -36,7 +36,7 @@ GeckoControl::GeckoControl()
   base_velocity_sub_      = nh_.subscribe("base_velocity", 10, &GeckoControl::baseVelocityCallback, this);
   flipper_velocity_sub_   = nh_.subscribe("flipper_velocity", 10, &GeckoControl::flipperVelocityCallback, this);
   base_orientation_sub_   = nh_.subscribe("base_orientation", 10, &GeckoControl::baseOrientationCallback, this);
-  mbed_pub_ = nh_.advertise<gecko_control::MbedTx>("mbed_tx", 10);
+  mbed_pub_ = nh_.advertise<gecko_msgs::MbedTx>("mbed_tx", 10);
 
   // Get parameters
   if(!nh_.getParam("/wheel_radius", WHEEL_RADIUS_))
@@ -67,7 +67,7 @@ GeckoControl::GeckoControl()
  *
  * WARN: Need modification
  */
-void GeckoControl::baseVelocityCallback(const gecko_control::BaseVelocity::ConstPtr& msg)
+void GeckoControl::baseVelocityCallback(const gecko_msgs::BaseVelocity::ConstPtr& msg)
 {
   base_velocity_.linear  = msg->linear;
   base_velocity_.angular = msg->angular;
@@ -80,7 +80,7 @@ void GeckoControl::baseVelocityCallback(const gecko_control::BaseVelocity::Const
 
   WheelVelocity wheel_velocity = baseVelocity2wheelVelocity(reference_velocity);
 
-  gecko_control::MbedTx tx_data;
+  gecko_msgs::MbedTx tx_data;
   wheelVelocity2mbedTxData(wheel_velocity, &tx_data);
 
   mbed_pub_.publish(tx_data);
@@ -93,7 +93,7 @@ void GeckoControl::baseVelocityCallback(const gecko_control::BaseVelocity::Const
  *
  * TODO: check
  */
-void GeckoControl::flipperVelocityCallback(const gecko_control::FlipperVelocity::ConstPtr& msg)
+void GeckoControl::flipperVelocityCallback(const gecko_msgs::FlipperVelocity::ConstPtr& msg)
 {
   flipper_velocity_.front_left  = msg->front_left;
   flipper_velocity_.rear_left   = msg->rear_left;
@@ -105,7 +105,7 @@ void GeckoControl::flipperVelocityCallback(const gecko_control::FlipperVelocity:
   imposeVelocityLimit(flipper_velocity_.front_right);
   imposeVelocityLimit(flipper_velocity_.rear_right);
 
-  gecko_control::MbedTx tx_data;
+  gecko_msgs::MbedTx tx_data;
   flipperVelocity2mbedTxData(flipper_velocity_, &tx_data);
   mbed_pub_.publish(tx_data);
 }
@@ -179,7 +179,7 @@ WheelVelocity GeckoControl::baseVelocity2wheelVelocity(const Velocity base_veloc
  * \param tx_data (output)
  * TODO: check
  */
-void GeckoControl::wheelVelocity2mbedTxData(const WheelVelocity &wheel_velocity, gecko_control::MbedTx* tx_data)
+void GeckoControl::wheelVelocity2mbedTxData(const WheelVelocity &wheel_velocity, gecko_msgs::MbedTx* tx_data)
 {
   // TODO: You must check and modify!
   tx_data->command = 0x01;
@@ -204,7 +204,7 @@ void GeckoControl::wheelVelocity2mbedTxData(const WheelVelocity &wheel_velocity,
  * NOTE: とりあえずそのまま送信する
  * TODO: check
  */
-void GeckoControl::flipperVelocity2mbedTxData(const FlipperVelocity& flipper_velocity, gecko_control::MbedTx* tx_data)
+void GeckoControl::flipperVelocity2mbedTxData(const FlipperVelocity& flipper_velocity, gecko_msgs::MbedTx* tx_data)
 {
   tx_data->command  = 0x02;
   tx_data->data[0] = flipper_velocity.front_left;
