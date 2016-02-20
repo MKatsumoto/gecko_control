@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>gecko_control</name>
+  <version>0.1.1</version>
+  <description>The gecko_control package</description>
+
+  <maintainer email="winbook1216.m@gmail.com">Masahiro Katsumoto</maintainer>
+  <license>BSD</license>
+  <author email="winbook1216.m@gmail.com">Masahiro Katsumoto</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>message_runtime</run_depend> 
+
+</package>
