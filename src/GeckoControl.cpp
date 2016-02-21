@@ -35,7 +35,7 @@ GeckoControl::GeckoControl()
 {
   base_velocity_sub_      = nh_.subscribe("base_velocity", 10, &GeckoControl::baseVelocityCallback, this);
   flipper_velocity_sub_   = nh_.subscribe("flipper_velocity", 10, &GeckoControl::flipperVelocityCallback, this);
-  base_orientation_sub_   = nh_.subscribe("base_orientation", 10, &GeckoControl::baseOrientationCallback, this);
+  base_orientation_sub_   = nh_.subscribe("imu/data", 10, &GeckoControl::baseOrientationCallback, this);
   mbed_pub_ = nh_.advertise<gecko_msgs::MbedTx>("mbed_tx", 10);
 
   // Get parameters
