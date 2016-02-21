@@ -58,10 +58,6 @@ class GeckoControl
 {
 public:
   GeckoControl(); // Initialize publisher and subscriber
-  // Callback function
-  void baseVelocityCallback(const gecko_msgs::BaseVelocity::ConstPtr& msg);         // TODO: check
-  void flipperVelocityCallback(const gecko_msgs::FlipperVelocity::ConstPtr& msg); // TODO: modify
-  void baseOrientationCallback(const sensor_msgs::Imu::ConstPtr& msg);                  // TODO: check
 
 private:
   ros::NodeHandle nh_;
@@ -76,6 +72,11 @@ private:
 
   double WHEEL_RADIUS_;
   double TREAD_;
+
+  // Callback function
+  void baseVelocityCallback(const gecko_msgs::BaseVelocity::ConstPtr& msg);
+  void flipperVelocityCallback(const gecko_msgs::FlipperVelocity::ConstPtr& msg);
+  void baseOrientationCallback(const sensor_msgs::Imu::ConstPtr& msg);
 
   // Helper Functions
   void adaptVelocity2Slope(const Velocity& velocity, Velocity* modified_velocity);
