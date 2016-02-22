@@ -10,8 +10,6 @@
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define DEBUG
-
 #include <ros/ros.h>
 #include "gecko_control/GeckoControl.h"
 

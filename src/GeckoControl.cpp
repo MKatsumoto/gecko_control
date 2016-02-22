@@ -25,6 +25,8 @@
  * Author: Masahiro Katsumoto
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#define DEBUG
+
 #include "gecko_control/GeckoControl.h"
 #include <tf/transform_datatypes.h>
 
@@ -69,13 +71,12 @@ GeckoControl::GeckoControl()
  */
 void GeckoControl::baseVelocityCallback(const gecko_msgs::BaseVelocity::ConstPtr& msg)
 {
-  base_velocity_.linear  = msg->linear;
-  base_velocity_.angular = msg->angular;
+  base_velocity_ = *msg;
 
   imposeVelocityLimit(base_velocity_.linear);
   imposeVelocityLimit(base_velocity_.angular);
 
-  Velocity reference_velocity;
+  gecko_msgs::BaseVelocity reference_velocity;
   adaptVelocity2Slope(base_velocity_, &reference_velocity);
 
   WheelVelocity wheel_velocity = baseVelocity2wheelVelocity(reference_velocity);
@@ -95,10 +96,7 @@ void GeckoControl::baseVelocityCallback(const gecko_msgs::BaseVelocity::ConstPtr
  */
 void GeckoControl::flipperVelocityCallback(const gecko_msgs::FlipperVelocity::ConstPtr& msg)
 {
-  flipper_velocity_.front_left  = msg->front_left;
-  flipper_velocity_.rear_left   = msg->rear_left;
-  flipper_velocity_.front_right = msg->front_right;
-  flipper_velocity_.rear_right = msg->rear_right;
+  flipper_velocity_ = *msg;
 
   imposeVelocityLimit(flipper_velocity_.front_left);
   imposeVelocityLimit(flipper_velocity_.rear_left);
@@ -148,10 +146,14 @@ void GeckoControl::baseOrientationCallback(const sensor_msgs::Imu::ConstPtr& msg
  * TODO:不感帯への対応？
  * TODO:速度の倍率変更？
  */
-void GeckoControl::adaptVelocity2Slope(const Velocity &velocity, Velocity *modified_velocity)
+void GeckoControl::adaptVelocity2Slope(const gecko_msgs::BaseVelocity &velocity, gecko_msgs::BaseVelocity *modified_velocity)
 {
-  modified_velocity->linear  = velocity.linear;
-  modified_velocity->angular = velocity.angular;
+  *modified_velocity = velocity;
+//  modified_velocity->linear  = velocity.linear;
+//  modified_velocity->angular = velocity.angular;
+#ifdef DEBUG
+  ROS_INFO("modified_velocity linear: %d, angular: %d", modified_velocity->linear, modified_velocity->angular);
+#endif
 }
 
 
@@ -161,17 +163,23 @@ void GeckoControl::adaptVelocity2Slope(const Velocity &velocity, Velocity *modif
  * \return WheelVelocity (left and right wheel vel.)
  * TODO: check
  */
-WheelVelocity GeckoControl::baseVelocity2wheelVelocity(const Velocity base_velocity)
+WheelVelocity GeckoControl::baseVelocity2wheelVelocity(const gecko_msgs::BaseVelocity base_velocity)
 {
   WheelVelocity wheel_velocity;
-  wheel_velocity.left  = static_cast<int16_t>((base_velocity.linear - 0.5 * TREAD_ * base_velocity.angular) / WHEEL_RADIUS_);
-  wheel_velocity.right = static_cast<int16_t>((base_velocity.linear + 0.5 * TREAD_ * base_velocity.angular) / WHEEL_RADIUS_);
+  static const float LINEAR_SCALE = 0.5;
+  static const float ANGULAR_SCALE = 0.5;
+  float scaled_linear_vel  = LINEAR_SCALE  * base_velocity_.linear;   // [100 * m/sec]
+  float scaled_angular_vel = ANGULAR_SCALE * base_velocity_.angular;  // [100 * rad/sec]
 #ifdef DEBUG
-  ROS_DEBUG("wheel vel L: %d, wheel vel R: %d \n", wheel_velocity.left, wheel_velocity.right);
+  ROS_INFO("scaled_linear_vel: %f, scaled_angular_vel: %f", scaled_linear_vel, scaled_angular_vel);
+#endif
+  wheel_velocity.left  = static_cast<int16_t>((scaled_linear_vel - 0.5 * TREAD_ * scaled_angular_vel) / WHEEL_RADIUS_); // [100 * rad/sec]
+  wheel_velocity.right = static_cast<int16_t>((scaled_linear_vel + 0.5 * TREAD_ * scaled_angular_vel) / WHEEL_RADIUS_); // [100 * rad/sec]
+#ifdef DEBUG
+  ROS_INFO("wheel vel L: %d, wheel vel R: %d \n", wheel_velocity.left, wheel_velocity.right);
 #endif
   return wheel_velocity;
 }
-
 
 /*!
  * \brief Convert wheel velocity to formatted data for mbed.
@@ -190,7 +198,7 @@ void GeckoControl::wheelVelocity2mbedTxData(const WheelVelocity &wheel_velocity,
 #ifdef DEBUG
   for (int i = 0; i<3; i++)
   {
-    ROS_DEBUG("Crawler data[%d]:%d \n", i, tx_data->data[i]);
+    ROS_INFO("Crawler data[%d]:%d \n", i, tx_data->data[i]);
   }
 #endif
 }
@@ -204,7 +212,7 @@ void GeckoControl::wheelVelocity2mbedTxData(const WheelVelocity &wheel_velocity,
  * NOTE: とりあえずそのまま送信する
  * TODO: check
  */
-void GeckoControl::flipperVelocity2mbedTxData(const FlipperVelocity& flipper_velocity, gecko_msgs::MbedTx* tx_data)
+void GeckoControl::flipperVelocity2mbedTxData(const gecko_msgs::FlipperVelocity& flipper_velocity, gecko_msgs::MbedTx* tx_data)
 {
   tx_data->command  = 0x02;
   tx_data->data[0] = flipper_velocity.front_left;
@@ -214,7 +222,7 @@ void GeckoControl::flipperVelocity2mbedTxData(const FlipperVelocity& flipper_vel
 #ifdef DEBUG
   for (int i = 0; i<3; i++)
   {
-    ROS_DEBUG("Flipper data[%d]:%d \n", i, tx_data->data[i]);
+    ROS_INFO("Flipper data[%d]:%d \n", i, tx_data->data[i]);
   }
 #endif
 }

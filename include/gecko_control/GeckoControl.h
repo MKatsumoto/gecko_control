@@ -26,20 +26,6 @@
 #include "gecko_msgs/MbedTx.h"
 
 /* ---------- Data Structure ---------- */
-struct Velocity
-{
-  int linear;
-  int angular;
-};
-
-struct FlipperVelocity
-{
-  int front_left;
-  int rear_left;
-  int front_right;
-  int rear_right;
-};
-
 struct WheelVelocity
 {
   int16_t left;
@@ -66,8 +52,8 @@ private:
   ros::Subscriber base_orientation_sub_;
   ros::Publisher  mbed_pub_;
 
-  Velocity base_velocity_;
-  FlipperVelocity flipper_velocity_;
+  gecko_msgs::BaseVelocity base_velocity_;
+  gecko_msgs::FlipperVelocity flipper_velocity_;
   Orientation base_orientation_;
 
   double WHEEL_RADIUS_;
@@ -79,11 +65,11 @@ private:
   void baseOrientationCallback(const sensor_msgs::Imu::ConstPtr& msg);
 
   // Helper Functions
-  void adaptVelocity2Slope(const Velocity& velocity, Velocity* modified_velocity);
-  WheelVelocity baseVelocity2wheelVelocity(const Velocity base_velocity);
+  void adaptVelocity2Slope(const gecko_msgs::BaseVelocity& velocity, gecko_msgs::BaseVelocity* modified_velocity);
+  WheelVelocity baseVelocity2wheelVelocity(const gecko_msgs::BaseVelocity base_velocity);
   void wheelVelocity2mbedTxData(const WheelVelocity& wheel_velocity, gecko_msgs::MbedTx* tx_data);
-  void flipperVelocity2mbedTxData(const FlipperVelocity& flipper_velocity, gecko_msgs::MbedTx* tx_data);
-  inline void imposeVelocityLimit(int& velocity)
+  void flipperVelocity2mbedTxData(const gecko_msgs::FlipperVelocity& flipper_velocity, gecko_msgs::MbedTx* tx_data);
+  inline void imposeVelocityLimit(int8_t& velocity)
   {
     if(velocity > 100) velocity = 100;
     else if(velocity < -100) velocity = -100;
