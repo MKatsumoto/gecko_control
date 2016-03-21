@@ -39,16 +39,6 @@ GeckoControl::GeckoControl()
   flipper_velocity_sub_   = nh_.subscribe("flipper_velocity", 10, &GeckoControl::flipperVelocityCallback, this);
   base_orientation_sub_   = nh_.subscribe("imu/data", 10, &GeckoControl::baseOrientationCallback, this);
   mbed_pub_ = nh_.advertise<gecko_msgs::MbedTx>("mbed_tx", 10);
-
-  // Get parameters
-  if(!nh_.getParam("/wheel_radius", WHEEL_RADIUS_))
-  {
-    ROS_ERROR("/wheel_radius is not defined!");
-  }
-  if(!nh_.getParam("/tread", TREAD_))
-  {
-    ROS_ERROR("/tread is not defined!");
-  }
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - *
@@ -169,17 +159,15 @@ void GeckoControl::adaptVelocity2Slope(const gecko_msgs::BaseVelocity &velocity,
 WheelVelocity GeckoControl::baseVelocity2wheelVelocity(const gecko_msgs::BaseVelocity base_velocity)
 {
   WheelVelocity wheel_velocity;
-  static const float LINEAR_SCALE = 0.5;
-  static const float ANGULAR_SCALE = 0.5;
-  float scaled_linear_vel  = LINEAR_SCALE  * base_velocity_.linear;   // [100 * m/sec]
-  float scaled_angular_vel = ANGULAR_SCALE * base_velocity_.angular;  // [100 * rad/sec]
+  static const float LINEAR_SCALE = 1.0;
+  static const float ANGULAR_SCALE = 1.0;
+  float scaled_linear_vel  = LINEAR_SCALE  * base_velocity_.linear;
+  float scaled_angular_vel = ANGULAR_SCALE * base_velocity_.angular;
 #ifdef DEBUG
   ROS_INFO("scaled_linear_vel: %f, scaled_angular_vel: %f", scaled_linear_vel, scaled_angular_vel);
 #endif
-//  wheel_velocity.left  = static_cast<int16_t>((scaled_linear_vel - 0.5 * TREAD_ * scaled_angular_vel) / WHEEL_RADIUS_); // [100 * rad/sec]
-//  wheel_velocity.right = static_cast<int16_t>((scaled_linear_vel + 0.5 * TREAD_ * scaled_angular_vel) / WHEEL_RADIUS_); // [100 * rad/sec]
-  wheel_velocity.left  = static_cast<int16_t>((base_velocity_.linear - 0.5 * base_velocity_.angular) * (32760 / 150));
-  wheel_velocity.right = static_cast<int16_t>((base_velocity_.linear + 0.5 * base_velocity_.angular) * (32760 / 150));
+  wheel_velocity.left  = static_cast<int16_t>((base_velocity_.linear - 1.0 * base_velocity_.angular) * (32760 / 100));
+  wheel_velocity.right = static_cast<int16_t>((base_velocity_.linear + 1.0 * base_velocity_.angular) * (32760 / 100));
 #ifdef DEBUG
   ROS_INFO("wheel vel L: %d, wheel vel R: %d \n", wheel_velocity.left, wheel_velocity.right);
 #endif
